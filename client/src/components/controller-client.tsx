@@ -37,12 +37,12 @@ export function ControllerClient({ serverUrl, displayId }: { serverUrl: string, 
       controllerClient.disconnect()
         .catch((e: Error) => console.error('error disconnecting:', e.message));
     }
-  }, [status]);
+  }, [status, clickedToLink, serverUrl]);
 
   if (status === 'connected') {
     return <div className='flex flex-col items-center gap-2 mt-8'>
       <h1 className='font-bold text-2xl'>Hello!</h1>
-      <p>You're trying to access display {displayId}</p>
+      <p>You&apos;re trying to access display {displayId}</p>
       <p>What is your name?</p>
       <form action={() => {
         setClickedToLink(true);

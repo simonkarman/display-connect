@@ -50,7 +50,7 @@ export function DisplayClient({ serverUrl }: { serverUrl: string }) {
       displayClient.link('d/' + id)
         .catch((e: Error) => console.error('error linking:', e.message));
     }
-  }, [status]);
+  }, [status, serverUrl]);
 
   if (status === 'linked') {
     return <Display displayInformation={displayInformation!} />
