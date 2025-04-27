@@ -11,9 +11,8 @@ export function Display({ displayInformation }: { displayInformation: DisplayInf
       <DisplayControllers displayInformation={displayInformation}/>
       <svg viewBox={'-1 -1 12 12'} className="w-[480px] h-[480px] bg-white rounded-lg shadow-lg">
         <g transform='translate(-0.5, -0.5)'>
-          {Array.from({ length: 12 }, (_, i) => (<>
+          {Array.from({ length: 12 }, (_, i) => (<g key={'g' + i}>
             <line
-              key={'x' + i}
               x1={i}
               y1={0}
               x2={i}
@@ -21,14 +20,13 @@ export function Display({ displayInformation }: { displayInformation: DisplayInf
               className="stroke-gray-200 stroke-[0.05]"
             />
             <line
-              key={'y' + i}
               x1={0}
               y1={i}
               x2={11}
               y2={i}
               className="stroke-gray-200 stroke-[0.05]"
             />
-          </>))}
+          </g>))}
         </g>
         {Object.entries(data).map(([controllerId, location]) => (
           <>

@@ -8,6 +8,7 @@ export function DisplayQR({ displayInformation }: { displayInformation: DisplayI
     <Image
       className="opacity-100"
       width={200}
+      height={200}
       src={`https://api.qrserver.com/v1/create-qr-code/?data=${qrData}`}
       alt="QR Code"
     />

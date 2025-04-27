@@ -1,7 +1,18 @@
+import express from 'express';
+import { createServer as createHttpServer } from 'http';
 import { createServer } from '@krmx/server';
 import { enableUnlinkedKicker} from './unlinked-kicker';
 
+const app = express();
+const httpServer = createHttpServer(app);
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.get('/', (req, res) => {
+  res.send({ message: 'Hello World!' });
+});
+
 const server = createServer({
+  http: { server: httpServer, path: 'krmx' },
   isValidUsername(username: string) {
     return /^d\/[0-9]{12}$/.test(username) // Display: d/123456789012
       || /^c\/[0-9]{12}\/[a-zA-Z0-9](?!.*[._@-]{2})[a-zA-Z0-9._@-]{0,30}[a-zA-Z0-9]$/.test(username); // Controller: c/123456789012/abc
