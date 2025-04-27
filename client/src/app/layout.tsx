@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Suspense } from 'react';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,7 +32,9 @@ export default function RootLayout({
         className="flex min-h-[100svh] flex-col items-center justify-between"
       >
         <div className="w-full grow">
-          {children}
+          <Suspense fallback={<p className='p-2'>Loading...</p>}>
+            {children}
+          </Suspense>
         </div>
         <footer className="mb-1 flex items-center gap-2 px-3 py-1">
           <p className="text-center text-xs text-gray-500">
