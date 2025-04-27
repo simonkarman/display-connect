@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@krmx/client-react": "^0.6.3",
+    "@krmx/client-react": "^0.6.4",
     "nanoid": "^5.1.5",
     "next": "15.3.1",
     "react": "^19.0.0",
