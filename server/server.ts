@@ -3,22 +3,27 @@ import { createServer as createHttpServer } from 'http';
 import { createServer } from '@krmx/server';
 import { enableUnlinkedKicker} from './unlinked-kicker';
 
+// get version from package.json
+const version = require('./package.json').version;
+
 const app = express();
 const httpServer = createHttpServer(app);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.get('/', (req, res) => {
-  res.send({ message: 'Hello World!' });
+  res.send({ message: 'Hello World!', version });
 });
-
 const server = createServer({
-  http: { server: httpServer, path: 'krmx' },
+  http: { server: httpServer, path: 'krmx', queryParams: {
+      'version': version,
+    }
+  },
   isValidUsername(username: string) {
     return /^d\/[0-9]{12}$/.test(username) // Display: d/123456789012
       || /^c\/[0-9]{12}\/[a-zA-Z0-9](?!.*[._@-]{2})[a-zA-Z0-9._@-]{0,30}[a-zA-Z0-9]$/.test(username); // Controller: c/123456789012/abc
   }
 });
-enableUnlinkedKicker(server, { inactivitySeconds: 15 });
+enableUnlinkedKicker(server, { inactivitySeconds: 7 });
 
 const extract = (username: string) => {
   return {
@@ -35,6 +40,7 @@ interface Controller {
 }
 class Display {
   private readonly controllers: Record<string, Controller | undefined> = {};
+  private linked = false;
   constructor(
     public readonly id: string,
     public readonly width: number,
@@ -43,6 +49,14 @@ class Display {
 
   getUsername() {
     return 'd/' + this.id;
+  }
+
+  markAsUnlinked() {
+    this.linked = false;
+  }
+
+  markAsLinked() {
+    this.linked = true;
   }
 
   getControllerUsernames() {
@@ -61,10 +75,12 @@ class Display {
     const controller = this.controllers[controllerId];
     if (controller) {
       delete this.controllers[controllerId];
-      server.send(this.getUsername(), {
-        type: 'delete',
-        controllerId,
-      });
+      if (this.linked) {
+        server.send(this.getUsername(), {
+          type: 'delete',
+          controllerId,
+        });
+      }
     }
   }
 
@@ -100,7 +116,7 @@ class Display {
 
   forwardLocation(controllerId: string) {
     const controller = this.controllers[controllerId];
-    if (controller) {
+    if (controller && this.linked) {
       server.send(this.getUsername(), {
         type: 'location',
         controllerId,
@@ -113,7 +129,7 @@ class Display {
 const displays: Record<string, Display | undefined> = {};
 
 server.on('authenticate', (username, info, reject) => {
-  const { isController, displayId, controllerId } = extract(username);
+  const { isController, displayId } = extract(username);
   if (isController && displays[displayId] === undefined) {
     reject('display not found');
   }
@@ -135,13 +151,26 @@ server.on('join', (username) => {
   }
 });
 
+server.on('link', (username) => {
+  const { isDisplay, displayId } = extract(username);
+  if (isDisplay) {
+    displays[displayId]?.markAsLinked();
+  }
+});
+
+server.on('unlink', (username) => {
+  const { isDisplay, displayId } = extract(username);
+  if (isDisplay) {
+    displays[displayId]?.markAsUnlinked();
+  }
+});
+
 server.on('leave', (username) => {
   const { isDisplay, displayId, controllerId } = extract(username);
   const display = displays[displayId]
   if (isDisplay) {
-    for (let controllerUsernames in display?.getControllerUsernames()) {
-      server.kick(controllerUsernames);
-    }
+    display?.markAsUnlinked();
+    display?.getControllerUsernames().forEach(u => server.kick(u))
     delete displays[displayId];
   } else {
     display?.deleteController(controllerId);

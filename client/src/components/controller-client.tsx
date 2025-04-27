@@ -26,6 +26,8 @@ const useLocalState = (key: string, initialValue: string) => {
 export function ControllerClient({ serverUrl, displayId }: { serverUrl: string, displayId: string }) {
   const { status } = useControllerClient();
   const [username, setUsername] = useLocalState('username', '');
+  const isValidUsername = /^[a-zA-Z0-9](?!.*[._@-]{2})[a-zA-Z0-9._@-]{0,30}[a-zA-Z0-9]$/.test(username);
+  const showError = !isValidUsername && username.length >= 2;
   const [clickedToLink, setClickedToLink] = useState<boolean>(false);
 
   useEffect(() => {
@@ -50,17 +52,21 @@ export function ControllerClient({ serverUrl, displayId }: { serverUrl: string, 
           .catch((e: Error) => console.error('error linking:', e.message));
       }}>
         <input
-          className='bg-white border p-1 rounded-l'
+          className={`bg-white border p-1 rounded-l ${showError ? 'border-red-500' : ''}`}
           type='text'
           placeholder='Enter your username'
           value={username}
           onChange={(e) => setUsername(e.target.value)}
         />
         <button
-          className='p-1 border bg-white rounded-r'
-          disabled={username.length < 2} type='submit'
+          className={`p-1 border bg-white rounded-r disabled:bg-gray-200 disabled:text-gray-400`}
+          disabled={!isValidUsername} type='submit'
         >Link!</button>
       </form>
+      {showError && <p className='text-red-500 text-sm max-w-1/3'>
+        Invalid name, please only use alphanumeric characters and: dot (.), dash (-), at (@) and underscore (_).
+        Your name should start and end with an alphanumeric character and you cannot use two special characters in a row.
+      </p>}
     </div>
   }
   if (status === 'linked') {
