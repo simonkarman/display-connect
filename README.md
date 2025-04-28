@@ -1,10 +1,12 @@
 # Display Connect
-Enabling users to connect mobile devices as a controller to a larger display via QR code scanning.
+Enabling users to connect mobile devices as a controller to a larger display via QR code scanning. Build with [Krmx](https://simonkarman.github.io/krmx).
 
-Live demo: [Display Connect](https://display-connect.vercel.app)
+Live demo: [Display Connect](https://display-connect.vercel.app).
 
 ## About
-Display Connect is a demo application that enables users to connect mobile devices as a controller to a larger display via QR code scanning. The idea came after playing the [Sunderfold game](https://www.dreamhaven.com/games/sunderfolk) last weekend. Sunderfolk is a shared turn-based tactical RPG adventure where your phone becomes the controller. Inspired by gathering around a table with friends.
+Display Connect is a demo application that enables users to connect mobile devices as a controller to a larger display via QR code scanning.
+
+The idea came after playing [Sunderfold](https://www.dreamhaven.com/games/sunderfolk) last weekend. Sunderfolk is a shared turn-based tactical RPG adventure where your phone becomes the controller. Inspired by gathering around a table with friends.
 
 I thought: "Why not make something similar that anyone can use for their own projects?". It is the perfect project for [Krmx](https://simonkarman.github.io/krmx). Krmx is a network protocol for realtime multi-user interactions that I designed. It allows multiple devices to communicate with each other in real-time, making it ideal for applications this use case. It is the perfect solution for creating multiplayer games, collaborative applications, and interactive experiences.
 
