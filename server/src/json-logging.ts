@@ -49,7 +49,7 @@ function detectSeverity(message: unknown): Severity | null {
 }
 
 // Create a general console method handler
-function createConsoleOverride(defaultSeverity: Severity, logger: (line: { message: string, domain?: string, severity: Severity }) => void) {
+function createConsoleOverride(defaultSeverity: Severity, logger: (...args: unknown[]) => void) {
   return function (...args: unknown[]) {
     // If first arg is a string with severity indicator, use that
     const detectedSeverity = detectSeverity(args[0]);
@@ -71,7 +71,7 @@ function createConsoleOverride(defaultSeverity: Severity, logger: (line: { messa
     }
 
     const message = formatLog(...args);
-    logger({ severity, message, domain });
+    logger(JSON.stringify({ severity, message, domain }));
   };
 }
 
