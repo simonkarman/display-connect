@@ -1,29 +1,39 @@
+import './json-logging';
 import express from 'express';
 import { createServer as createHttpServer } from 'http';
 import { createServer } from '@krmx/server';
 import { enableUnlinkedKicker} from './unlinked-kicker';
+import { LogSeverity } from '@krmx/base/dist/src/log';
 
 // get version from package.json
-const version = require('./package.json').version;
+const version = require('../package.json').version;
 
 const app = express();
 const httpServer = createHttpServer(app);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.get('/', (req, res) => {
+app.use((req, _, next) => {
+  console.debug(`[debug] [http] ${req.ip} ${req.method} ${req.path}`);
+  next();
+})
+app.get('/', (_, res) => {
   res.send({ message: 'Hello World!', version });
 });
 const server = createServer({
-  http: { server: httpServer, path: 'krmx', queryParams: {
-      'version': version,
-    }
+  http: { server: httpServer, path: 'krmx', queryParams: { 'version': version } },
+  logger: (_severity: LogSeverity, ...args: unknown[]) => {
+    const severity = _severity === 'info' ? 'debug' : _severity;
+    console[severity](`[${severity}] [server]`, ...args);
   },
   isValidUsername(username: string) {
     return /^d\/[0-9]{12}$/.test(username) // Display: d/123456789012
       || /^c\/[0-9]{12}\/[a-zA-Z0-9](?!.*[._@-]{2})[a-zA-Z0-9._@-]{0,30}[a-zA-Z0-9]$/.test(username); // Controller: c/123456789012/abc
   }
 });
-enableUnlinkedKicker(server, { inactivitySeconds: 7 });
+enableUnlinkedKicker(server, {
+  inactivitySeconds: 7,
+  logger: message => console.info(`[info] [unlinked-kicker] ${message}`),
+});
 
 const extract = (username: string) => {
   return {
@@ -69,6 +79,8 @@ class Display {
       y: Math.floor(this.height / 2),
     };
     this.forwardLocation(controllerId);
+
+    this.logControllers();
   }
 
   deleteController(controllerId: string) {
@@ -81,7 +93,14 @@ class Display {
           controllerId,
         });
       }
+      this.logControllers();
     }
+  }
+
+  private logControllers = () => {
+    // Log the amount of controllers on the display
+    const controllerNames = Object.keys(this.controllers);
+    console.info(`[info] [display-connect] ${this.getUsername()} has ${controllerNames.length} controller(s):`, controllerNames);
   }
 
   moveController(controllerId: string, direction: string) {
@@ -140,6 +159,7 @@ server.on('join', (username) => {
 
   if (isDisplay) {
     displays[displayId] = new Display(displayId, 11, 11);
+    console.info(`[info] [display-connect] display ${username} created`);
   } else {
     const display = displays[displayId];
     if (display) {
@@ -172,6 +192,7 @@ server.on('leave', (username) => {
     display?.markAsUnlinked();
     display?.getControllerUsernames().forEach(u => server.kick(u))
     delete displays[displayId];
+    console.info(`[info] [display-connect] display ${username} deleted`);
   } else {
     display?.deleteController(controllerId);
   }
@@ -179,9 +200,12 @@ server.on('leave', (username) => {
 
 server.on('message', (username, message) => {
   const { isController, displayId, controllerId } = extract(username);
-  console.debug(`[debug] [display-connect] ${username} sent ${message.type}`);
   if (isController && message.type === 'move' && typeof message.payload === 'string') {
-    displays[displayId]?.moveController(controllerId, message.payload);
+    const direction = message.payload;
+    console.debug(`[debug] [display-connect] ${username} moved ${direction}`);
+    displays[displayId]?.moveController(controllerId, direction);
+  } else {
+    console.warn(`[warn] [display-connect] ${username} sent unknown ${message.type} message`);
   }
 });
 

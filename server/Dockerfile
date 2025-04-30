@@ -20,6 +20,7 @@ EXPOSE 8082
 # The PORT environment variable is used by Cloud Run to specify which port your app should listen on
 ENV PORT=8082
 ENV NODE_ENV=development
+ENV JSON_LOGGING=true
 
 # Start the application with npm run dev
 CMD ["npm", "run", "dev"]

@@ -12,9 +12,11 @@ import { Server } from '@krmx/server';
 export function enableUnlinkedKicker(server: Server, props?: {
   inactivitySeconds?: number,
   includeJoins?: boolean,
+  logger?: (message: string) => void,
 }): () => void {
   const inactivitySeconds = props?.inactivitySeconds ?? 60;
   const includeJoins = props?.includeJoins ?? false;
+  const logger = props?.logger ?? console.info;
 
   // Keep track of all inactivity timeouts.
   const inactivityTimeouts: Map<string, ReturnType<typeof setTimeout>> = new Map();
@@ -22,7 +24,7 @@ export function enableUnlinkedKicker(server: Server, props?: {
   // Start the inactivity countdown for a user when they are offline (not linked to a connection). This happens after unlinking.
   const startInactivityCountDown = (username: string) => {
     inactivityTimeouts.set(username, setTimeout(() => {
-      console.info(`kicking ${username} due to being offline for too long`);
+      logger(`kicking ${username} due to being offline for too long`);
       server.kick(username);
     }, inactivitySeconds * 1000));
   };
