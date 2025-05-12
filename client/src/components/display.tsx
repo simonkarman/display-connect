@@ -6,9 +6,8 @@ export function Display({ displayInformation }: { displayInformation: DisplayInf
   const data = useDisplayStore();
   return <>
     <div className="p-3 space-y-2 max-w-[480px]">
-      <h1 className="text-4xl font-bold text-white drop-shadow">Display Connect</h1>
+      <h1 className="text-4xl font-bold drop-shadow">Display Connect</h1>
       <p><b>Open this page on a large screen</b>. Then, scan the QR code with your mobile device to join.</p>
-      <DisplayControllers displayInformation={displayInformation}/>
       <svg viewBox={'-1 -1 12 12'} className="w-[480px] h-[480px] bg-white rounded-lg shadow-lg">
         <g transform='translate(-0.5, -0.5)'>
           {Array.from({ length: 12 }, (_, i) => (<g key={'g' + i}>
@@ -43,6 +42,7 @@ export function Display({ displayInformation }: { displayInformation: DisplayInf
           </>
         ))}
       </svg>
+      <DisplayControllers displayInformation={displayInformation}/>
     </div>
     <div className="absolute right-2 top-2 p-2 bg-white rounded-lg border shadow flex flex-col gap-2">
       <DisplayQR displayInformation={displayInformation}/>

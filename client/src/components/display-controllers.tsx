@@ -9,15 +9,16 @@ export function DisplayControllers({ displayInformation }: { displayInformation:
   }
   return <>
     <p>Controllers</p>
-    <ul>
-      {controllers.map((user) => <li
+    <div className='flex flex-wrap gap-2'>
+      {controllers.map((user) => <div
+        className={`flex gap-2 px-2 py-0.5 border rounded ${user.isLinked ? 'bg-green-200' : 'bg-red-200 opacity-50'}`}
         key={user.username}
-        className="list-disc ml-4"
       >
-        <div className="flex gap-2">
-          <p>{capitalize(user.username.replace('c/' + displayInformation.id + '/', ''))} {user.isLinked ? '🟢' : '🔴'}</p>
-        </div>
-      </li>)}
-    </ul>
+        <p>
+          {capitalize(user.username.replace('c/' + displayInformation.id + '/', ''))}
+          <span className='text-sm align-middle'>{user.isLinked ? ' 🟢' : ' 🔴'}</span>
+        </p>
+      </div>)}
+    </div>
   </>;
 }
